@@ -1,0 +1,182 @@
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Population Change Map Toggle</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f8f5;
+      color: #2f4f4f;
+    }
+
+    #map {
+      position: absolute;
+      top: 110px;
+      bottom: 0;
+      width: 100%;
+    }
+
+    #menu {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      background: #e6f2ea;
+      padding: 15px;
+      text-align: center;
+      z-index: 2;
+      box-shadow: 0 4px 6px rgba(0, 50, 0, 0.1);
+      border-bottom: 2px solid #a0c8a4;
+    }
+
+    #menu h2 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      color: #356859;
+    }
+
+    #menu p {
+      margin: 0 0 15px;
+      font-size: 14px;
+      color: #5c7c6e;
+    }
+
+    .btn {
+      margin: 0 8px;
+      padding: 12px 20px;
+      cursor: pointer;
+      background-color: #4b945b;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      font-size: 16px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn:hover {
+      background-color: #3a7e48;
+      transform: scale(1.05);
+    }
+
+    #legend {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 12px 16px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      font-size: 14px;
+      z-index: 2;
+      max-width: 220px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .legend-color {
+      width: 18px;
+      height: 18px;
+      margin-right: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    .color-0 { background-color: #def7f7; }
+    .color-3000 { background-color: #a1e2fc; }
+    .color-6000 { background-color: #05b9fa; }
+    .color-9000 { background-color: #06a1f4; }
+    .color-12000 { background-color: #3880f5; }
+    .color-15000 { background-color: #506afb; }
+    .color-18000 { background-color: #0927d3; }
+    .color-21000 { background-color: #36047c; }
+    .color-24000 { background-color: #5c05a3; }
+    .color-27000 { background-color: #9605c2; }
+    .color-30000 { background-color: #c23db2; }
+    .color-33655 { background-color: #a10254; }
+  </style>
+</head>
+<body>
+
+<div id="menu">
+  <h2>🌿 Coastal Population Changes 🌿 </h2>
+  <p>Visualize how marsh and wetland areas have changed over time through the lens of human population changes.</p>
+  <button class="btn" onclick="switchMap('2010')">Year 2010</button>
+  <button class="btn" onclick="switchMap('2015')">Year 2015</button>
+  <button class="btn" onclick="switchMap('2020')">Year 2020</button>
+</div>
+
+<div id="map"></div>
+
+<!-- Floating Legend -->
+<div id="legend">
+  <strong>Population Reported in County Areas</strong>
+  <div class="legend-item">
+    <div class="legend-color color-0"></div> 0 people
+  </div>
+  <div class="legend-item">
+    <div class="legend-color color-3000"></div> 3,000 people
+  </div>
+  <div class="legend-item">
+    <div class="legend-color color-6000"></div> 6,000 people
+  </div>
+  <div class="legend-item">
+    <div class="legend-color color-9000"></div> 9,000 people
+  </div>
+  <div class="legend-item">
+    <div class="legend-color color-12000"></div> 12,000 people
+  </div>
+  <div class="legend-item">
+    <div class="legend-color color-15000"></div> 15,000 people
+  </div>
+  <div class="legend-item">
+    <div class="legend-color color-18000"></div> 18,000 people
+  </div>
+  <div class="legend-item">
+    <div class="legend-color color-21000"></div> 21,000 people
+  </div>
+  <div class="legend-item">
+    <div class="legend-color color-24000"></div> 24,000 people
+  </div>
+  <div class="legend-item">
+    <div class="legend-color color-27000"></div> 27,000 people
+  </div>
+  <div class="legend-item">
+    <div class="legend-color color-30000"></div> 30,000 people
+  </div>
+  <div class="legend-item">
+    <div class="legend-color color-33655"></div> 33,655 people (Highest reported)
+  </div>
+</div>
+
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoibWFlcmxvdmVybiIsImEiOiJjbTd3NnhxY24wMmp4MmxvaGNheGMzcHJwIn0.ZiWXM5n2BI3ZZY25ULAprA';
+
+  const styles = {
+    '2010': 'mapbox://styles/maerlovern/cm9u62tan00f401sp6pyn1sls',
+    '2015': 'mapbox://styles/maerlovern/cm9u2sefe00g601sp0j8m8xb8',
+    '2020': 'mapbox://styles/maerlovern/cma8mj98k009q01si1wyl5g51'
+  };
+
+  let map = new mapboxgl.Map({
+    container: 'map',
+    style: styles['2010'],
+    center: [-89.657047, 27.750287],
+    zoom: 6
+  });
+
+  function switchMap(year) {
+    map.setStyle(styles[year]);
+  }
+</script>
+
+</body>
+</html>
